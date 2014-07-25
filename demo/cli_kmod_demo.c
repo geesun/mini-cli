@@ -14,6 +14,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*This file should compile both at user space and kernel space */
 
 #ifdef __KERNEL__
 #include <linux/module.h>

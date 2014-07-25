@@ -388,6 +388,8 @@ char demo_logo[] = "\
                YP  YP  YP Y888888P VP   V8P Y888888P        Y88888P  `Y88P'   Y888P   `Y88P' \r\n\
     \r\n\r\n";
 
+
+extern void cli_telnet_port_set(cli_int16 port);
 int main()
 {
     cli_init(CLI_NODE_ID_MAX,0);
@@ -448,13 +450,8 @@ int main()
 #ifdef CLI_KMOD_DEMO
     cli_k_demo_init();
 #endif
-#if 1
-	cli_server_start(0);
-#else
-    cli_telnetd_start(2300);
-    while(1){
-        sleep(10);
-    }
-#endif
+    
+    cli_telnet_port_set(2300);
+	cli_server_start(1);
     return 0;
 }

@@ -90,20 +90,20 @@ void cli_console()
 
 void cli_server_start(cli_boolean telnetd)
 {
-#ifdef CLI_HAS_TELNETD
-    pthread_t tel_thread_id = 0;
-#endif
 #ifdef CLI_OS_LINUX
     pthread_t thread_id;
-#else
-    isecos = TRUE;
-    cli_uint32 thread_id;
+#endif
+#ifdef CLI_HAS_TELNETD
+#ifdef CLI_OS_LINUX
+    pthread_t tel_thread_id = 0;
+#endif
 #endif
 
 
 #ifdef CLI_HAS_TELNETD
     if(telnetd){
 #ifdef CLI_OS_LINUX
+        /*For other OS, please replace the thread function*/
         pthread_create (&tel_thread_id, NULL, (void *)*cli_telnetd, NULL);
 #endif
     }
@@ -113,24 +113,28 @@ void cli_server_start(cli_boolean telnetd)
     pthread_create (&thread_id, NULL, (void *)*cli_console, NULL);
 #endif
 
-#ifdef CLI_OS_LINUX
 #ifdef CLI_HAS_TELNETD
     if(telnetd){
+#ifdef CLI_OS_LINUX
         pthread_join(tel_thread_id, NULL);
+#endif
     }
 #endif
+
+#ifdef CLI_OS_LINUX
     pthread_join(thread_id, NULL);
 #endif
 }
 
 #ifdef CLI_HAS_TELNETD
-#ifdef CLI_OS_LINUX
 void cli_telnetd_start(cli_int16 port)
 {
+#ifdef CLI_OS_LINUX
     pthread_t tel_thread_id = 0;
     cli_telnet_port_set(port);
     pthread_create (&tel_thread_id, NULL, (void *)*cli_telnetd, NULL);
-}
+    pthread_join(tel_thread_id, NULL);
 #endif
+}
 #endif
 /*lint +e611*/
