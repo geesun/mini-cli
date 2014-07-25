@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <string.h>
 #include "cli_api.h"
 #include "cli_server.h"
 /*lint -e611*/
@@ -28,41 +29,93 @@ extern void cli_init_telnet_server(cli_server_t * server);
 extern void cli_init_console_server(cli_server_t * server);
 extern void cli_init_ecos_telnet_server (cli_server_t * server);
 
-static cli_boolean isecos = FALSE;
 void cli_telnet_port_set(cli_int16 port);
 #ifdef CLI_HAS_TELNETD
+typedef struct{
+    cli_int8   valid;
+    cli_int32 socket; 
+    FILE *    out_fd;
+    cli_server_t * server;
+}cli_telnet_ctrl_t;
+#define CLI_TELNET_SESSION_NUM   8
+
+cli_telnet_ctrl_t  g_telnet_ctrl[CLI_TELNET_SESSION_NUM];
+
 FILE * g_cli_out = NULL;
 void cli_bc_print(cli_int8 * fmt,...)
 {
     va_list args;
+    cli_int32 i = 0;
 
     va_start(args, fmt);
-    vfprintf(g_cli_out, fmt, args);
+    for(i = 0; i < CLI_TELNET_SESSION_NUM;i++){
+        /*TODO:mutex protect */
+        if(g_telnet_ctrl[i].valid && g_telnet_ctrl[i].out_fd != NULL){
+            vfprintf(g_telnet_ctrl[i].out_fd, fmt, args);
+        }
+    }
     va_end(args);
+}
+
+void cli_telnetd_loop(void * data)
+{
+    cli_telnet_ctrl_t * t = (cli_telnet_ctrl_t*)data;
+    FILE * in;
+    FILE * out;
+
+    CLI_ASSERT(data != NULL);
+
+    if(CLI_OK == t->server->open_stream(t->socket,&in,&out)){
+        t->out_fd = out;
+        cli_main(CLI_SESSION_TELNET,in,out);
+        /*TODO: mutex protect */
+        t->out_fd = NULL;
+        t->valid = 0;
+        t->server->close_stream(t->socket,&in,&out);
+    }
+    
 }
 
 void cli_telnetd()
 {
     cli_server_t server;
     cli_int32 s = 0, x = 0;
-    FILE * in;
-    FILE * out;
+    cli_int32 i = 0;
+    cli_telnet_ctrl_t * t = NULL;
+    
+#ifdef CLI_OS_LINUX
+    pthread_t thread_id;
+#endif
 
-    if(!isecos){
-        cli_init_telnet_server(&server);
-    }else{
-        cli_init_ecos_telnet_server(&server);
-    }
+    memset(g_telnet_ctrl,0x00,
+            sizeof(cli_telnet_ctrl_t)*CLI_TELNET_SESSION_NUM);
+
+    cli_init_telnet_server(&server);
 
     s = server.init();
 
     while((x = server.client_accept(s)) != 0){
-        if(CLI_OK == server.open_stream(x,&in,&out)){
-            g_cli_out = out;
-            cli_main(CLI_SESSION_TELNET,in,out);
-            g_cli_out = NULL;
-            server.close_stream(x,&in,&out);
+        t = NULL;
+        for(i = 0; i < CLI_TELNET_SESSION_NUM; i++){
+            if(!g_telnet_ctrl[i].valid){
+                t = &g_telnet_ctrl[i];
+                break;
+            }
         }
+
+        if(t == NULL){
+            printf("No more session available \n");
+            close(x);
+            continue;
+        }
+        
+        t->valid = 1;
+        t->socket = x;
+        t->server = &server;
+        
+#ifdef CLI_OS_LINUX
+        pthread_create (&thread_id, NULL, (void *)*cli_telnetd_loop, (void *)t);
+#endif
     }
 
 }
