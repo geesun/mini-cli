@@ -352,6 +352,9 @@ CLI_DEFINE(
         "o\n")
 {
     cli_print(cli,"char o \n");
+    extern void cli_bc_print(cli_int8 * fmt,...)
+;
+    cli_bc_print("ddddddddddddddddddddd \n");
     return CLI_OK;
 }
 
