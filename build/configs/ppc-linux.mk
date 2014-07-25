@@ -20,4 +20,4 @@ LD_FLAGS=
 OS=linux
 ARCH=ppc
 
-KERNEL_BUILD := /home/geesun/src/uni_tiger4/eldk/ppc_4xx/usr/src/linux
+KERNEL_BUILD := /home/geesun/src/linux
