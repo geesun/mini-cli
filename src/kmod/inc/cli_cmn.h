@@ -17,7 +17,7 @@
 
 #ifndef __CLI_CMN_H__
 #define __CLI_CMN_H__
-
+#include "cli_error.h"
 #ifndef __KERNEL__
 #include "cli_api.h"
 
@@ -43,29 +43,6 @@ extern cli_int32 cli_cmd_ioctl(cli_shell_t *cli,cli_int8 * cmd ,cli_uint32 argc,
      cli_install_global_cmd(pcmd);
 
 #else
-
-#define CLI_ERROR_DEF \
-    xx(CLI_CMD_OK,              0,  "") \
-    xx(CLI_CMD_E_PARAM,             1,  "Invalid parameter") \
-    xx(CLI_CMD_E_AMBIGUOUS,         2,  "Ambiguous command") \
-    xx(CLI_CMD_E_CMD_NOT_COMPLETE,  3,  "Command not complete") \
-    xx(CLI_CMD_E_BAD_COMMAND,       4,  "Bad command") \
-    xx(CLI_CMD_E_CMD_NOT_FOUND,     5,  "Command not found") \
-    xx(CLI_CMD_E_NO_RESOURCE,       6,  "No resource") \
-    xx(CLI_CMD_E_IOCTL ,            7,  "CLI ioctl error") \
-    xx(CLI_CMD_E_NO_KERNEL_HDL ,    8,  "Not found handle in kernel") \
-    xx(CLI_CMD_E_USER_EXIST,        9,  "User already exist") \
-    xx(CLI_CMD_E_USER_NOT_EXIST,    10, "User not exist") \
-    xx(CLI_CMD_E_USER_TOO_MANY,     11, "User num reach the maximum") \
-    xx(CLI_CMD_E_USER_WRONG_PASSWD, 12, "User password is wrong") \
-    xx(CLI_CMD_E_USER_NEW_PASSWD_NOT_MATCH, 13, "User new password and confirm password not matched") \
-    xx(CLI_CMD_E_MAX,               14, "") \
-
-typedef enum{
-#undef xx
-#define xx(ID,VALUE,ERROR) ID = VALUE,
-    CLI_ERROR_DEF
-}cli_cmd_status_t;
 
 typedef char cli_shell_t;
 
