@@ -20,4 +20,4 @@ LD_FLAGS=
 OS=linux
 ARCH=arm
 
-KERNEL_BUILD := /home/geesun/src/lynxe_latest/openwrt-10.03/build_dir/linux-lynxe/linux-2.6.32.3/
+KERNEL_BUILD := /home/geesun/linux
