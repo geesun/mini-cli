@@ -7,7 +7,7 @@ TARGET_STATIC_LIB=libcli-x86.a
 TARGET_STATIC_SRCS= \
 					$(CMN_SRCS) \
 
-TARGET_STATIC_CFLAGS=-Iinc/ -DCLI_OS_LINUX -Icli-kmod -Wall -Werror -g -DCLI_HAS_TELNETD
+TARGET_STATIC_CFLAGS=-Isrc/inc/ -DCLI_OS_LINUX -Icli-kmod -Wall -Werror -g -DCLI_HAS_TELNETD
 
 TARGET_SHARE_LIB=libcli-x86.so
 TARGET_SHARE_SRCS= \
@@ -19,9 +19,9 @@ TARGET_SHARE_LD_FLAGS=
 TARGET_PROG =cli_demo
 TARGET_PROG_SRCS = \
 				   $(CMN_SRCS)  \
-				   cli_demo.c \
+				   demo/cli_demo.c \
 			
-TARGET_PROG_CFLAGS = $(TARGET_STATIC_CFLAGS) 
+TARGET_PROG_CFLAGS = $(TARGET_STATIC_CFLAGS)  -Idemo -Isrc/kmod/inc
 TARGET_PROG_LD_FLAGS =-lpthread -lrt
 
 TARGET_KERNEL=
