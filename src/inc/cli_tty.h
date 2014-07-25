@@ -137,12 +137,7 @@ FILE * cli_tty_get_istream(const cli_tty_t *tty);
 FILE * cli_tty_get_ostream(const cli_tty_t *tty);
 
 
-#ifdef CLI_OS_ECOS
-#define CLI_VFPINTF(f,fmt,...)             cli_vfprintf((f),(fmt),##__VA_ARGS__)
-#define CLI_GETC(f)                        cli_getc((f))
-#else
 #define CLI_VFPINTF(f,fmt,...)             vfprintf((f),(fmt),##__VA_ARGS__)
 #define CLI_GETC(f)                        getc((f))
-#endif
 
 #endif

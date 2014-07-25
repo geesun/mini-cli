@@ -388,11 +388,7 @@ char demo_logo[] = "\
                YP  YP  YP Y888888P VP   V8P Y888888P        Y88888P  `Y88P'   Y888P   `Y88P' \r\n\
     \r\n\r\n";
 
-#ifdef CLI_OS_ECOS
-int cli_start()
-#else
 int main()
-#endif
 {
     cli_init(CLI_NODE_ID_MAX,0);
     cli_logo_set(demo_logo,strlen(demo_logo));

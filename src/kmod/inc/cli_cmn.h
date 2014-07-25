@@ -18,8 +18,7 @@
 #ifndef __CLI_CMN_H__
 #define __CLI_CMN_H__
 
-#ifdef CLI_OS_LINUX
-#ifndef CLI_KERNEL_SPACE
+#ifndef __KERNEL__
 #include "cli_api.h"
 
 extern cli_int32 cli_cmd_ioctl(cli_shell_t *cli,cli_int8 * cmd ,cli_uint32 argc, cli_int8 **argv);
@@ -124,18 +123,5 @@ cli_int32 cli_kioctl_init(void);
 void cli_kioctl_exit(void);
 
 #endif
-
-#else
-#define CLI_KERNEL_DEFINE(func,cmd,cmd_str,cmd_desc) \
-    CLI_DEFINE(func,cmd,cmd_str,cmd_desc)
-
-#define CLI_KERNEL_CMD_INSTALL(node,pcmd)    \
-     cli_install_cmd(node,pcmd)
-
-#define CLI_KERNEL_GLOBAL_CMD_INSTALL(pcmd)    \
-     cli_install_global_cmd(pcmd)
-
 #endif
 
-
-#endif

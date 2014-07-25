@@ -15,7 +15,7 @@
  */
 
 
-#ifdef CLI_KERNEL_SPACE
+#ifdef __KERNEL__
 #include <linux/module.h>
 #endif
 #include "cli_cmn.h"
@@ -28,7 +28,7 @@ CLI_KERNEL_DEFINE(
         "kernel info <1-2> ",
         "debug information\n"
         "inter face id \n")
-#ifdef CLI_KERNEL_SPACE
+#ifdef __KERNEL__
 {
     unsigned int i = 0; 
 
@@ -65,7 +65,7 @@ CLI_KERNEL_DEFINE(
         "kernel show <1-20000> ",
         "debug information\n"
         "inter face id \n")
-#ifdef CLI_KERNEL_SPACE
+#ifdef __KERNEL__
 {
 #if 1
     unsigned int i = 0; 
