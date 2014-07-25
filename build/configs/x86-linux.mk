@@ -1,0 +1,23 @@
+CROSS_COMPILE=
+CC=$(CROSS_COMPILE)gcc
+AS=$(CROSS_COMPILE)gcc
+CXX = $(CROSS_COMPILE)g++
+AR = $(CROSS_COMPILE)ar
+LD = $(CROSS_COMPILE)ld
+OBJCOPY = $(CROSS_COMPILE)objcopy
+OBJDUMP = $(CROSS_COMPILE)objdum
+
+
+
+CFLAGS=
+
+CFLAGS+=
+
+LD_PATH=
+LD_FLAGS=
+
+
+OS=linux
+ARCH=x86_64
+
+KERNEL_BUILD := /lib/modules/$(shell uname -r)/build/
