@@ -2,6 +2,7 @@ mini-cli
 ========
 The mini-cli is define for embedded device, it make the command line define as easy as we define a function. 
 It also support define the command line which the callback in kernel space.
+The code was base on Linux but it has been ported to vxWorks and ecos.
 
 Components
 --------
