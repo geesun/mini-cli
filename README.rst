@@ -17,7 +17,7 @@ Components
 
 Example command define
 -------
-- Define the command ::
+- Define simple command ::
 
       CLI_DEFINE(
           cli_handler_cwmp_debug,
@@ -105,5 +105,27 @@ Command define rules
    debug (on|off) 
    config ip (A.B.C.D|A::B) 
    
- 
-   
+
+API
+----------
+- cli_init
+- cli_main
+- cli_add_node
+- cli_enter_node
+- cli_install_cmd 
+- cli_install_pri_cmd
+- cli_print 
+- cli_get_input
+- cli_echo_enable
+- cli_server_start 
+- cli_telnetd_start
+- cli_context_set
+- cli_context_get
+- cli_logo_set
+- cli_hostname_set
+- CLI_DEFINE
+- CLI_DEFINE_ALIAS
+- CLI_KERNEL_DEFINE
+- CLI_KERNEL_CMD_INSTALL
+
+
