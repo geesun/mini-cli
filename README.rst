@@ -15,6 +15,61 @@ Components
 - Virtual terminal(Vt100) short cut support
 - Command history management
 
+Example command define
+-------
+- Define the command ::
+
+      CLI_DEFINE(
+          cli_handler_cwmp_debug,
+          cli_cmd_cwmp_debug,
+          "debug (stack|cm) (on|off)",
+          "Cwmp debug setting \n"
+          "Stack debug\n"
+          "Configure management debug\n"
+          "Enable the debug \n"
+          "Disable the debug\n"
+      )
+      {
+          cs_uint8 debug = 0;
+          cs_uint8 cm = 0;
+      
+          if(strcmp(argv[0],"cm") == 0){
+              cm = 1;
+          }
+      
+          if(strcmp(argv[1],"on") == 0){
+              debug = 1;
+          }
+          
+          /* do stuff */
+          
+          return CLI_CMD_OK;
+      }
+      
+      /* install the command */
+      cli_install_pri_cmd(CLI_PRI_DEBUG,CLI_NODE_CWMP,&cli_cmd_cwmp_debug);
+
+- Define the command which callback in Linux kernel space ::
+
+        CLI_KERNEL_DEFINE(
+                cli_handle_kernel,
+                cli_kernel_cmd,
+                "show kernel <1-20000> ",
+                "show information\n"
+                "kernel config \n"
+                "block id"
+                )
+        #ifdef __KERNEL__
+        {
+            cli_print(cli,"block id = %s \n",argv[0]);
+            /*call any kernel space function*/
+            return CLI_CMD_E_PARAM;
+        }
+        #endif
+      
+        /* this line must be called in userspace and kernel space */
+        CLI_KERNEL_CMD_INSTALL(CLI_NODE_ID_CONFIG,&cli_kernel_cmd);
+      
 Command define rules
 --------
 - Lowercase word is keyword ::
