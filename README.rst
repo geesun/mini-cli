@@ -14,14 +14,40 @@ Components
 - Virtual terminal(Vt100) short cut support
 - Command history management
 
-Command defines rule
+Command define rules
 --------
-- Keyword must be all in lowercase 
+- Lowercase word is keyword ::
 
-    set max-results 50
-    set console-width 120
-    set columns user:14 date comments rating likes dislikes category:9 views
-    set order views
-    
-  Example::
-     show interface <1-3> 
+   show interface <1-3> 
+     
+- Uppercase word is input anything ::
+
+   add user NAME
+   
+- Range define between < and > ::
+ 
+   show interface <0-5>
+   
+- Mac address define A:B:C:D:E:F ::
+
+   show fdb A:B:C:D:E:F
+   
+- IPv4 Address define as A.B.C.D ::
+
+   ping A.B.C.D
+   
+- IPv6 address define as A::B ::
+
+   ping A::B 
+   
+- Option parameter should at end and define between [ and ] ::
+
+   add USER [PASSWD] 
+   
+- One parameter support more then one type, use | to split the type and surround with () ::
+
+   debug (on|off) 
+   config ip (A.B.C.D|A::B) 
+   
+ 
+   
