@@ -281,6 +281,8 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+KERNEL_MOD = @KERNEL_MOD@
+KERNEL_SRC = @KERNEL_SRC@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -364,6 +366,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+with_kernel = @with_kernel@
+with_kernel_mod = @with_kernel_mod@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 VERSION_INFO = 1:0:0
@@ -1047,7 +1051,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) config.h
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) config.h all-local
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs:
@@ -1093,7 +1097,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool mostlyclean-am
+	clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1166,15 +1170,15 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: all install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am am--refresh check check-am clean \
-	clean-binPROGRAMS clean-cscope clean-generic \
-	clean-libLTLIBRARIES clean-libtool cscope cscopelist-am ctags \
-	ctags-am dist dist-all dist-bzip2 dist-gzip dist-lzip \
-	dist-shar dist-tarZ dist-xz dist-zip distcheck distclean \
-	distclean-compile distclean-generic distclean-hdr \
-	distclean-libtool distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
+.PHONY: CTAGS GTAGS TAGS all all-am all-local am--refresh check \
+	check-am clean clean-binPROGRAMS clean-cscope clean-generic \
+	clean-libLTLIBRARIES clean-libtool clean-local cscope \
+	cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
+	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
+	distcheck distclean distclean-compile distclean-generic \
+	distclean-hdr distclean-libtool distclean-tags distcleancheck \
+	distdir distuninstallcheck dvi dvi-am html html-am info \
+	info-am install install-am install-binPROGRAMS install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-libLTLIBRARIES install-man install-pdf \
@@ -1185,6 +1189,20 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
 	uninstall-libLTLIBRARIES
 
+
+demo/module/minicli.ko:
+	 test -f $(builddir)/demo/module/cli_kmod_demo.c  || \
+		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ;
+	 $(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
+
+src/kmod/kernel/miniclidev.ko:
+	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
+
+all-local: demo/module/minicli.ko src/kmod/kernel/miniclidev.ko
+
+clean-local:
+	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel clean
+	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

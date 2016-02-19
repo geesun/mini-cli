@@ -36,4 +36,16 @@ libmini_cli_la_SOURCES =  \
 libmini_cli_la_CPPFLAGS = $(FLAGS)
 libmini_cli_la_LDFLAGS = -version-info $(VERSION_INFO)
 
+demo/module/minicli.ko:
+	 test -f $(builddir)/demo/module/cli_kmod_demo.c  || \
+		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ;
+	 $(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
 
+src/kmod/kernel/miniclidev.ko:
+	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
+
+all-local: demo/module/minicli.ko src/kmod/kernel/miniclidev.ko
+
+clean-local:
+	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel clean
+	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module clean

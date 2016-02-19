@@ -1,10 +1,15 @@
-AC_INIT([mini-cli], [1.0], [geesun@gmail.com],[https://github.com/geesun/mini-cli])
+AC_INIT([mini-cli], [1.0], [geesun@gmail.com])
 
 AC_PREREQ([2.68])
 
 AC_CONFIG_SRCDIR([src/cli_main.c])
 
 AC_CONFIG_HEADERS([config.h])
+
+AC_SUBST([with_kernel], [`uname -r`])
+AC_SUBST([with_kernel_mod], [/lib/modules/$with_kernel/extra])
+AC_SUBST([KERNEL_SRC], [/lib/modules/$with_kernel/build])
+AC_SUBST([KERNEL_MOD], [$with_kernel_mod])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
