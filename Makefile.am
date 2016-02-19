@@ -1,5 +1,27 @@
 ACLOCAL_AMFLAGS=-I m4
 AUTOMAKE_OPTIONS = foreign
+EXTRA_DIST=demo/module/Makefile \
+		   src/inc/cli_api.h \
+		   src/inc/cli_auth.h \
+		   src/inc/cli_cmd.h \
+		   src/inc/cli_error.h \
+		   src/inc/cli_history.h \
+		   src/inc/cli_history_item.h \
+		   src/inc/cli_node.h \
+		   src/inc/cli_parser.h \
+		   src/inc/cli_readline.h \
+		   src/inc/cli_server.h \
+		   src/inc/cli_shell.h \
+		   src/inc/cli_tty.h \
+		   src/inc/cli_utils.h \
+		   src/inc/cli_vector.h \
+		   src/kmod/inc/cli_cmn.h \
+		   src/kmod/inc/cli_kmod_msg.h \
+		   src/kmod/kernel/cli_kmod_kern.c \
+		   src/kmod/kernel/Makefile \
+		   src/kmod/kernel/cli_kmod_kern.h  \
+		   demo/cli_demo.h \
+		   README.rst
 
 VERSION_INFO = 1:0:0
 
