@@ -276,6 +276,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GREP = @GREP@
+HAVE_KERNEL_CLI = @HAVE_KERNEL_CLI@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -390,7 +391,8 @@ EXTRA_DIST = demo/module/Makefile \
 		   src/kmod/kernel/cli_kmod_kern.c \
 		   src/kmod/kernel/Makefile \
 		   src/kmod/kernel/cli_kmod_kern.h  \
-		   demo/cli_demo.h 
+		   demo/cli_demo.h \
+		   README.rst
 
 VERSION_INFO = 1:0:0
 FLAGS = -Isrc/inc -Idemo/ -Isrc/kmod/inc 
@@ -1073,6 +1075,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
+@HAVE_KERNEL_CLI_FALSE@all-local:
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) config.h all-local
 install-binPROGRAMS: install-libLTLIBRARIES
 
@@ -1116,6 +1119,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@HAVE_KERNEL_CLI_FALSE@clean-local:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -1211,20 +1215,19 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
 	uninstall-libLTLIBRARIES
 
+@HAVE_KERNEL_CLI_TRUE@demo/module/minicli.ko:
+@HAVE_KERNEL_CLI_TRUE@	 test -f $(builddir)/demo/module/cli_kmod_demo.c  || \
+@HAVE_KERNEL_CLI_TRUE@		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ; 
+@HAVE_KERNEL_CLI_TRUE@	 $(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI" ; 
 
-demo/module/minicli.ko:
-	 test -f $(builddir)/demo/module/cli_kmod_demo.c  || \
-		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ;
-	 $(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
+@HAVE_KERNEL_CLI_TRUE@src/kmod/kernel/miniclidev.ko:
+@HAVE_KERNEL_CLI_TRUE@	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
 
-src/kmod/kernel/miniclidev.ko:
-	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
+@HAVE_KERNEL_CLI_TRUE@all-local: demo/module/minicli.ko src/kmod/kernel/miniclidev.ko
 
-all-local: demo/module/minicli.ko src/kmod/kernel/miniclidev.ko
-
-clean-local:
-	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel clean
-	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module clean
+@HAVE_KERNEL_CLI_TRUE@clean-local:
+@HAVE_KERNEL_CLI_TRUE@	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel clean
+@HAVE_KERNEL_CLI_TRUE@	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

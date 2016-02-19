@@ -710,6 +710,9 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
+HAVE_KERNEL_CLI
+HAVE_KERNEL_CLI_FALSE
+HAVE_KERNEL_CLI_TRUE
 KERNEL_MOD
 KERNEL_SRC
 with_kernel_mod
@@ -2282,10 +2285,28 @@ if test "${enable_kernel+set}" = set; then :
 fi
 
 
+ if false; then
+  HAVE_KERNEL_CLI_TRUE=
+  HAVE_KERNEL_CLI_FALSE='#'
+else
+  HAVE_KERNEL_CLI_TRUE='#'
+  HAVE_KERNEL_CLI_FALSE=
+fi
+
 if test "x$enable_kernel" = "xyes"; then :
 
 
 $as_echo "#define HAVE_KERNEL_CLI 1" >>confdefs.h
+
+                HAVE_KERNEL_CLI=1
+
+                 if true; then
+  HAVE_KERNEL_CLI_TRUE=
+  HAVE_KERNEL_CLI_FALSE='#'
+else
+  HAVE_KERNEL_CLI_TRUE='#'
+  HAVE_KERNEL_CLI_FALSE=
+fi
 
 
 fi
@@ -11941,6 +11962,14 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
+if test -z "${HAVE_KERNEL_CLI_TRUE}" && test -z "${HAVE_KERNEL_CLI_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_KERNEL_CLI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_KERNEL_CLI_TRUE}" && test -z "${HAVE_KERNEL_CLI_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_KERNEL_CLI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking that generated files are newer than configure" >&5
 $as_echo_n "checking that generated files are newer than configure... " >&6; }
    if test -n "$am_sleep_pid"; then

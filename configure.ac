@@ -27,8 +27,11 @@ dnl Example of default-disabled feature
 AC_ARG_ENABLE([kernel],
               AS_HELP_STRING([--enable-kernel], [Enable kernel space cli]))
 
+AM_CONDITIONAL([HAVE_KERNEL_CLI], [false])
 AS_IF([test "x$enable_kernel" = "xyes"], [
                 AC_DEFINE([HAVE_KERNEL_CLI], [1], [Enable kernel space cli])
+                AC_SUBST([HAVE_KERNEL_CLI], [1])
+                AM_CONDITIONAL([HAVE_KERNEL_CLI], [true])
                 ])
 
 

@@ -57,7 +57,7 @@ libmini_cli_la_SOURCES =  \
 
 libmini_cli_la_CPPFLAGS = $(FLAGS)
 libmini_cli_la_LDFLAGS = -version-info $(VERSION_INFO)
-
+if HAVE_KERNEL_CLI
 demo/module/minicli.ko:
 	 test -f $(builddir)/demo/module/cli_kmod_demo.c  || \
 		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ;
@@ -71,3 +71,5 @@ all-local: demo/module/minicli.ko src/kmod/kernel/miniclidev.ko
 clean-local:
 	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel clean
 	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module clean
+
+endif
