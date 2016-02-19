@@ -16,6 +16,7 @@
 
 /*This file should compile both at user space and kernel space */
 
+#ifdef HAVE_KERNEL_CLI
 #ifdef __KERNEL__
 #include <linux/module.h>
 #endif
@@ -120,4 +121,4 @@ MODULE_LICENSE("GPL");
 module_init(cli_k_demo_init);
 module_exit(cli_k_demo_exit);
 #endif
-
+#endif

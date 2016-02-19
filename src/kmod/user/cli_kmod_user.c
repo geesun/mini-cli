@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include "cli_cmn.h"
 #include "cli_kmod_msg.h"
-
+#ifdef HAVE_KERNEL_CLI
 /*lint -e64*/
 cli_int32 cli_cmd_ioctl(cli_shell_t *cli,cli_int8 * cmd ,cli_uint32 argc, cli_int8 **argv)
 {
@@ -59,5 +59,6 @@ cli_int32 cli_cmd_ioctl(cli_shell_t *cli,cli_int8 * cmd ,cli_uint32 argc, cli_in
     return CLI_CMD_E_IOCTL;
 }
 
+#endif
 /*lint +e64*/
 

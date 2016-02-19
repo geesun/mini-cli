@@ -15,6 +15,7 @@
  */
 
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -344,6 +345,7 @@ CLI_DEFINE(
 }
 
 
+#if 0
 CLI_DEFINE(
         cli_handle_one_char_handler_o,
         test_one_char_o_handler_cmd,
@@ -358,7 +360,6 @@ CLI_DEFINE(
     return CLI_OK;
 }
 
-#if 0
 void * cli_test_timer_add(
         cli_uint32 timeout,
         cli_shell_t * shell,
@@ -407,7 +408,7 @@ int main()
     cli_install_global_cmd(&test_one_char_handler_cmd);
     cli_global_cmd_node_range(CLI_NODE_ID_CONFIG,CLI_NODE_ID_TEST7);
 
-    cli_install_global_cmd(&test_one_char_o_handler_cmd);
+    //cli_install_global_cmd(&test_one_char_o_handler_cmd);
 
 
     cli_add_node(CLI_NODE_ID_SDK);
