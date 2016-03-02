@@ -41,7 +41,7 @@ CLI_KERNEL_DEFINE(
         cli_print(cli,"\n\nparam[%d] = %s \n",i,argv[i]);
     }
     cli_print(cli,"cli done \r\r\n");
-    return CLI_CMD_E_PARAM;
+    return CLI_CMD_OK;
 }
 #endif
 
@@ -80,7 +80,7 @@ CLI_KERNEL_DEFINE(
         cli_print(cli,"param[%d] = %s \n",i,argv[i]);
     }
 
-    for(i = 0; i < 1000; i++){
+    for(i = 0; i < 10; i++){
         cli_print(cli, "%-3u %-5u %-7u %-6u %-9u %-8u %-5u %-7u %-6u %-9u %-8u\r\n", 
                 i, 
                 tc_cfg.us_tc,
@@ -97,27 +97,30 @@ CLI_KERNEL_DEFINE(
     }
 #endif 
     cli_print(cli,"cli done \n");
-    return CLI_CMD_E_PARAM;
+    return CLI_CMD_OK;
 }
 #endif
 
-int cli_k_demo_init(void)
-{
 #ifdef __KERNEL__
-    cli_kioctl_init();
+static int __init  cli_k_demo_init(void)
+#else
+int cli_k_demo_init(void)
 #endif
+{
     CLI_KERNEL_CMD_INSTALL(CLI_NODE_ID_CONFIG,&kernel_cmd);
     CLI_KERNEL_GLOBAL_CMD_INSTALL(&kernel_cmd1);
     return 0;
 }
 
 #ifdef __KERNEL__
-static void cli_k_demo_exit(void)
+static void __exit cli_k_demo_exit(void)
 {
     
 }
-
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("GPL");            
+MODULE_AUTHOR("Qixiang Xu");    
+MODULE_DESCRIPTION("Demo Command line");  
+MODULE_VERSION("0.1"); 
 module_init(cli_k_demo_init);
 module_exit(cli_k_demo_exit);
 #endif

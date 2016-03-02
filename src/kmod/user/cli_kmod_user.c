@@ -48,7 +48,7 @@ cli_int32 cli_cmd_ioctl(cli_shell_t *cli,cli_int8 * cmd ,cli_uint32 argc, cli_in
     sprintf(dev_name, "/dev/%s", CLI_IOCTL_NAME);
     ioctl_fd = open(dev_name, O_RDWR);
     if (ioctl_fd != -1) {
-        ret = ioctl(ioctl_fd, _IO(CLI_IOCTL_MAGIC, CLI_IOCTL_CMD), &msg);
+        ret = ioctl(ioctl_fd, CLI_IOCTL_CMD, &msg);
         if(ret == 0){
             close(ioctl_fd);
             cli_print(cli,"%s",msg.ret_buf);

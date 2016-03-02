@@ -14,37 +14,31 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <linux/module.h>
-#include <linux/types.h>
-#include <linux/socket.h>
-#include <linux/kernel.h>
-#include <linux/string.h>
-#include <linux/sockios.h>
-#include <linux/net.h>
-#include <linux/skbuff.h>
-#include <linux/err.h>
-#include <linux/interrupt.h>
-#include <linux/init.h>
-#include <linux/netlink.h>
-#include <linux/timer.h>
-#include <linux/kthread.h>
-#include <linux/sched.h>
-#include <linux/fs.h>
-#include <linux/device.h>
-#include <linux/delay.h>
-#include <asm/uaccess.h>
-#include <net/sock.h>
-#include <linux/version.h>
+#include <linux/init.h>           // Macros used to mark up functions e.g. __init __exit
+#include <linux/module.h>         // Core header for loading LKMs into the kernel
+#include <linux/device.h>         // Header to support the kernel Driver Model
+#include <linux/kernel.h>         // Contains types, macros, functions for the kernel
+#include <linux/fs.h>             // Header for the Linux file system support
+#include <linux/cdev.h>
+#include <asm/uaccess.h>          // Required for the copy to user function
 #include "cli_cmn.h"
 #include "cli_kmod_msg.h"
 #include "cli_kmod_kern.h"
 
+#define  CLASS_NAME  "mincli"       
+
+MODULE_LICENSE("GPL");            
+MODULE_AUTHOR("Qixiang Xu");    
+MODULE_DESCRIPTION("A Linux char driver for the Command line");  
+MODULE_VERSION("0.1");           
+
+
 static struct file_operations cli_ioctl_fops;
-#if LINUX_VERSION_CODE >= 0x020618
-static struct class *cli_ioctl_class;
-#endif
-static cli_int32 cli_ioctl_major = 56;
+static struct class *  cli_ioctl_class  = NULL; 
+static struct device * cli_ioctl_device = NULL; 
+static struct cdev * cli_ioctl_cdev = NULL;
+static cli_int32 cli_ioctl_major = 0;
+
 static cli_int8 cfg_value[sizeof(cli_cmd_msg_t)];
 
 static cli_kern_cmd_map_t  g_cli_cmd_mapping[CLI_CMD_MAX_NUM];
@@ -166,20 +160,15 @@ cli_int32 cli_k_run_cmd(cli_int8 * cmd,void * cli,cli_uint32 argc, cli_int8 ** a
     return CLI_CMD_E_NO_KERNEL_HDL;
 }
 
-static long cli_cmd_ioctl(struct file *filp, cli_uint32 cmd, unsigned long arg)
+static long cli_cmd_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-    cli_int32 cmd_nr;
-    //cli_int8 cfg_value[CS_MAX_CFG_LEN];
     cli_cmd_msg_t *pMsg = NULL;
     cli_int32 ret =  -1;
     cli_int8*argv[CLI_CMD_MAX_ARG_NUM]  = {NULL};
     cli_int32 i  = 0 ;
     
     memset(cfg_value,0x00,sizeof(cfg_value));
-    if (_IOC_TYPE(cmd) != CLI_IOCTL_MAGIC)
-        return ret;
-
-    if ((cmd_nr = _IOC_NR(cmd)) != CLI_IOCTL_CMD)
+    if (cmd != CLI_IOCTL_CMD)
         return ret;
    
     pMsg = (cli_cmd_msg_t*)cfg_value;
@@ -195,38 +184,52 @@ static long cli_cmd_ioctl(struct file *filp, cli_uint32 cmd, unsigned long arg)
     return 0;
 }
 
-
 static struct file_operations cli_ioctl_fops = {
 	.owner		= THIS_MODULE,
 	.unlocked_ioctl = cli_cmd_ioctl,
 };
 
-cli_int32 cli_kioctl_init(void)
+static int cli_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
 {
-#if LINUX_VERSION_CODE < 0x020618
-#ifdef CONFIG_DEVFS_FS
-    int ret  =0;
-#endif
-#endif
+    add_uevent_var(env, "DEVMODE=%#o", 0666);
+    return 0;
+}
 
-	if (register_chrdev(cli_ioctl_major, CLI_IOCTL_NAME , &cli_ioctl_fops)) {
-		cli_printk("kernel cli init failure\n");
-        return -1;
-    }
+static int __init cli_kioctl_init(void)
+{
+    int err = 0;
+    cli_printk("kernel cli initializing.\n");
 
-#if LINUX_VERSION_CODE >= 0x020618
-    cli_ioctl_class = class_create(THIS_MODULE, CLI_IOCTL_NAME);
-    if (IS_ERR(cli_ioctl_class)) {
-        cli_printk("%s create class faild!\n", CLI_IOCTL_NAME);
-        return -1;
-    }
+    cli_ioctl_major = register_chrdev(0, CLI_IOCTL_NAME, &cli_ioctl_fops);
+    if (cli_ioctl_major<0){
+        cli_printk("kernel cli init failure\n");
+        return cli_ioctl_major;
+   }
+ 
+   cli_ioctl_cdev = cdev_alloc();
+   cdev_init(cli_ioctl_cdev, &cli_ioctl_fops);
+   cli_ioctl_cdev->owner = THIS_MODULE;
+   err = cdev_add(cli_ioctl_cdev, MKDEV(cli_ioctl_major, 0), 1);
+    
+   if (err != 0)
+        cli_printk("cli device register failed!\n");
+   // Register the device class
+   cli_ioctl_class = class_create(THIS_MODULE, CLASS_NAME);
+   if (IS_ERR(cli_ioctl_class)){                // Check for error and clean up if there is
+      unregister_chrdev(cli_ioctl_major, CLI_IOCTL_NAME);
+      cli_printk("Failed to register device class\n");
+      return PTR_ERR(cli_ioctl_class);          // Correct way to return an error on a pointer
+   }
 
-    device_create(cli_ioctl_class, NULL, MKDEV(cli_ioctl_major, 0), NULL, CLI_IOCTL_NAME);
-#else
-#ifdef CONFIG_DEVFS_FS
-    ret = devfs_mk_cdev(MKDEV(cli_ioctl_major, 0), S_IFCHR | S_IRUSR | S_IWUSR | S_IRGRP, CLI_IOCTL_NAME);
-#endif
-#endif
+   cli_ioctl_class->dev_uevent = cli_dev_uevent;
+   // Register the device driver
+   cli_ioctl_device = device_create(cli_ioctl_class, NULL, MKDEV(cli_ioctl_major, 0), NULL, CLI_IOCTL_NAME);
+   if (IS_ERR(cli_ioctl_device)){               // Clean up if there is an error
+      class_destroy(cli_ioctl_class);           // Repeated code but the alternative is goto statements
+      unregister_chrdev(cli_ioctl_major, CLI_IOCTL_NAME);
+      cli_printk("Failed to create the device\n");
+      return PTR_ERR(cli_ioctl_device);
+   }
 
     cli_k_cmd_init();
 
@@ -235,22 +238,18 @@ cli_int32 cli_kioctl_init(void)
     return 0;
 }
 
-void cli_kioctl_exit(void)
+static void __exit cli_kioctl_exit(void)
 {
-    unregister_chrdev(cli_ioctl_major, CLI_IOCTL_NAME);
-#if LINUX_VERSION_CODE >= 0x020618
-    device_destroy(cli_ioctl_class, MKDEV(cli_ioctl_major, 0));
-    class_destroy(cli_ioctl_class);
-#endif
-
+    cdev_del(cli_ioctl_cdev);
+    device_destroy(cli_ioctl_class, MKDEV(cli_ioctl_major, 0));    
+    class_unregister(cli_ioctl_class);                          
+    class_destroy(cli_ioctl_class);                           
+    unregister_chrdev(cli_ioctl_major, CLI_IOCTL_NAME);        
     cli_printk("%s unregister successfully\n", CLI_IOCTL_NAME);
 }
 
-#if 0
-MODULE_LICENSE("GPL");
 module_init(cli_kioctl_init);
 module_exit(cli_kioctl_exit);
 
-EXPORT_SYMBOL(cli_k_cmd_reg);
-EXPORT_SYMBOL(cli_print);
-#endif
+EXPORT_SYMBOL_GPL(cli_k_cmd_reg);
+EXPORT_SYMBOL_GPL(cli_print);

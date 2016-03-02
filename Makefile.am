@@ -23,16 +23,43 @@ EXTRA_DIST=demo/module/Makefile \
 		   demo/cli_demo.h \
 		   README.rst
 
+include_HEADERS = src/kmod/inc/cli_cmn.h \
+				  src/inc/cli_error.h \
+				  src/inc/cli_api.h 
+
 VERSION_INFO = 1:0:0
 
-FLAGS=-Isrc/inc -Idemo/ -Isrc/kmod/inc 
+CLI_FLAGS = -Isrc/inc  -Isrc/kmod/inc
+if CLI_HAS_TELNETD
+CLI_FLAGS += -DCLI_HAS_TELNETD
+endif
 
-bin_PROGRAMS = mini_cli
-mini_cli_SOURCES = \
-				   demo/cli_demo.c \
+if HAVE_KERNEL_CLI
+include_HEADERS += src/kmod/inc/cli_cmn.h 
+endif 
+
+if CLI_OS_LINUX
+CLI_FLAGS += -DCLI_OS_LINUX
+endif
+
+if CLI_OS_VXWORKS
+CLI_FLAGS += -DCLI_OS_VXWORKS
+endif
+
+if CLI_OS_ECOS
+CLI_FLAGS += -DCLI_OS_ECOS
+endif
+
+noinst_PROGRAMS = cli_demo
+cli_demo_SOURCES = \
+				   demo/cli_demo.c 
+if HAVE_KERNEL_CLI
+cli_demo_SOURCES += \
 				   demo/cli_kmod_demo.c 
-mini_cli_CPPFLAGS = $(FLAGS)
-mini_cli_LDFLAGS = -lmini_cli 
+CLI_FLAGS += -DHAVE_KERNEL_CLI
+endif
+cli_demo_CFLAGS = $(CLI_FLAGS) -Idemo/
+cli_demo_LDFLAGS = -lmini_cli 
 
 lib_LTLIBRARIES = libmini_cli.la
 libmini_cli_la_SOURCES =  \
@@ -52,21 +79,27 @@ libmini_cli_la_SOURCES =  \
 	src/cli_telnet.c \
 	src/cli_tty.c \
 	src/cli_utils.c \
-	src/cli_vector.c \
-	src/kmod/user/cli_kmod_user.c 
+	src/cli_vector.c 
 
-libmini_cli_la_CPPFLAGS = $(FLAGS)
+if HAVE_KERNEL_CLI
+libmini_cli_la_SOURCES +=  \
+	src/kmod/user/cli_kmod_user.c 
+endif
+
+libmini_cli_la_CFLAGS = $(CLI_FLAGS)
 libmini_cli_la_LDFLAGS = -version-info $(VERSION_INFO)
+
 if HAVE_KERNEL_CLI
 demo/module/minicli.ko:
 	 test -f $(builddir)/demo/module/cli_kmod_demo.c  || \
 		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ;
+	 cp $(abs_top_builddir)/src/kmod/kernel/Module.symvers  $(abs_top_srcdir)/demo/module
 	 $(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
 
 src/kmod/kernel/miniclidev.ko:
 	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
 
-all-local: demo/module/minicli.ko src/kmod/kernel/miniclidev.ko
+all-local: src/kmod/kernel/miniclidev.ko demo/module/minicli.ko
 
 clean-local:
 	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel clean

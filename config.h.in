@@ -1,17 +1,5 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Enable the telnet server */
-#undef CLI_HAS_TELNETD
-
-/* Build for Ecos systems */
-#undef CLI_OS_ECOS
-
-/* Build for Linux systems */
-#undef CLI_OS_LINUX
-
-/* Build for vxWorks systems */
-#undef CLI_OS_VXWORKS
-
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #undef HAVE_ARPA_INET_H
 
@@ -23,9 +11,6 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
-
-/* Enable kernel space cli */
-#undef HAVE_KERNEL_CLI
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H

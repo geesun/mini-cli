@@ -95,10 +95,6 @@ extern int cli_print(
      /*add to the table*/ \
      cli_k_cmd_reg((pcmd)->name,(pcmd)->handler);
 
-cli_int32 cli_kioctl_init(void);
-
-void cli_kioctl_exit(void);
-
 #endif
 #endif
 

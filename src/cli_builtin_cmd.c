@@ -71,14 +71,7 @@ CLI_DEFINE(cli_show_cmd_list,cli_cmd_list,"list","Show command list")
 
 CLI_DEFINE(cli_cmd_logout,cli_cmd_cli_logout,"logout","Exit this CLI session")
 {
-#ifndef CLI_OS_LINUX
-    /*in serial port, no logout support*/
-    if(cli->readline->term->istream != stdin){
-#endif
-        cli->state = CLI_SHELL_STATE_CLOSING;
-#ifndef CLI_OS_LINUX
-    }
-#endif
+    cli->state = CLI_SHELL_STATE_CLOSING;
     return CLI_CMD_OK;
 }
 

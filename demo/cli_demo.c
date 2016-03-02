@@ -451,7 +451,7 @@ int main()
     cli_session_timer_set(cli_test_timer_add,cli_test_timer_del);
     cli_session_idle_time_set(NULL,1000*3*60);
 #endif
-#ifdef CLI_KMOD_DEMO
+#ifdef HAVE_KERNEL_CLI
     cli_k_demo_init();
 #endif
     

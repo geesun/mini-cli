@@ -710,9 +710,16 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
-HAVE_KERNEL_CLI
+CLI_OS_ECOS_FALSE
+CLI_OS_ECOS_TRUE
+CLI_OS_VXWORKS_FALSE
+CLI_OS_VXWORKS_TRUE
+CLI_OS_LINUX_FALSE
+CLI_OS_LINUX_TRUE
 HAVE_KERNEL_CLI_FALSE
 HAVE_KERNEL_CLI_TRUE
+CLI_HAS_TELNETD_FALSE
+CLI_HAS_TELNETD_TRUE
 KERNEL_MOD
 KERNEL_SRC
 with_kernel_mod
@@ -2271,10 +2278,23 @@ if test "${enable_telnet+set}" = set; then :
 fi
 
 
-if test "x$enable_telnet" != "xno"; then :
+ if true; then
+  CLI_HAS_TELNETD_TRUE=
+  CLI_HAS_TELNETD_FALSE='#'
+else
+  CLI_HAS_TELNETD_TRUE='#'
+  CLI_HAS_TELNETD_FALSE=
+fi
 
+if test "x$enable_telnet" = "xno"; then :
 
-$as_echo "#define CLI_HAS_TELNETD 1" >>confdefs.h
+   if false; then
+  CLI_HAS_TELNETD_TRUE=
+  CLI_HAS_TELNETD_FALSE='#'
+else
+  CLI_HAS_TELNETD_TRUE='#'
+  CLI_HAS_TELNETD_FALSE=
+fi
 
 
 fi
@@ -2295,12 +2315,7 @@ fi
 
 if test "x$enable_kernel" = "xyes"; then :
 
-
-$as_echo "#define HAVE_KERNEL_CLI 1" >>confdefs.h
-
-                HAVE_KERNEL_CLI=1
-
-                 if true; then
+    if true; then
   HAVE_KERNEL_CLI_TRUE=
   HAVE_KERNEL_CLI_FALSE='#'
 else
@@ -2327,20 +2342,60 @@ else
 fi
 
 
+ if false; then
+  CLI_OS_LINUX_TRUE=
+  CLI_OS_LINUX_FALSE='#'
+else
+  CLI_OS_LINUX_TRUE='#'
+  CLI_OS_LINUX_FALSE=
+fi
+
+ if false; then
+  CLI_OS_VXWORKS_TRUE=
+  CLI_OS_VXWORKS_FALSE='#'
+else
+  CLI_OS_VXWORKS_TRUE='#'
+  CLI_OS_VXWORKS_FALSE=
+fi
+
+ if false; then
+  CLI_OS_ECOS_TRUE=
+  CLI_OS_ECOS_FALSE='#'
+else
+  CLI_OS_ECOS_TRUE='#'
+  CLI_OS_ECOS_FALSE=
+fi
+
+
 case "${with_os}" in
   linux)
-
-$as_echo "#define CLI_OS_LINUX 1" >>confdefs.h
+     if true; then
+  CLI_OS_LINUX_TRUE=
+  CLI_OS_LINUX_FALSE='#'
+else
+  CLI_OS_LINUX_TRUE='#'
+  CLI_OS_LINUX_FALSE=
+fi
 
     ;;
   vxworks)
-
-$as_echo "#define CLI_OS_VXWORKS 1" >>confdefs.h
+     if true; then
+  CLI_OS_VXWORKS_TRUE=
+  CLI_OS_VXWORKS_FALSE='#'
+else
+  CLI_OS_VXWORKS_TRUE='#'
+  CLI_OS_VXWORKS_FALSE=
+fi
 
     ;;
   ecos)
-
-$as_echo "#define CLI_OS_ECOS 1" >>confdefs.h
+     if true; then
+  CLI_OS_ECOS_TRUE=
+  CLI_OS_ECOS_FALSE='#'
+else
+  CLI_OS_ECOS_TRUE='#'
+  CLI_OS_ECOS_FALSE=
+fi
 
     ;;
 esac
@@ -11962,12 +12017,44 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
+if test -z "${CLI_HAS_TELNETD_TRUE}" && test -z "${CLI_HAS_TELNETD_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_HAS_TELNETD\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CLI_HAS_TELNETD_TRUE}" && test -z "${CLI_HAS_TELNETD_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_HAS_TELNETD\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${HAVE_KERNEL_CLI_TRUE}" && test -z "${HAVE_KERNEL_CLI_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_KERNEL_CLI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_KERNEL_CLI_TRUE}" && test -z "${HAVE_KERNEL_CLI_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_KERNEL_CLI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CLI_OS_LINUX_TRUE}" && test -z "${CLI_OS_LINUX_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_OS_LINUX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CLI_OS_VXWORKS_TRUE}" && test -z "${CLI_OS_VXWORKS_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_OS_VXWORKS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CLI_OS_ECOS_TRUE}" && test -z "${CLI_OS_ECOS_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_OS_ECOS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CLI_OS_LINUX_TRUE}" && test -z "${CLI_OS_LINUX_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_OS_LINUX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CLI_OS_VXWORKS_TRUE}" && test -z "${CLI_OS_VXWORKS_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_OS_VXWORKS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CLI_OS_ECOS_TRUE}" && test -z "${CLI_OS_ECOS_FALSE}"; then
+  as_fn_error $? "conditional \"CLI_OS_ECOS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking that generated files are newer than configure" >&5

@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -79,15 +80,28 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mini_cli$(EXEEXT)
+@CLI_HAS_TELNETD_TRUE@am__append_1 = -DCLI_HAS_TELNETD
+@HAVE_KERNEL_CLI_TRUE@am__append_2 = src/kmod/inc/cli_cmn.h 
+@CLI_OS_LINUX_TRUE@am__append_3 = -DCLI_OS_LINUX
+@CLI_OS_VXWORKS_TRUE@am__append_4 = -DCLI_OS_VXWORKS
+@CLI_OS_ECOS_TRUE@am__append_5 = -DCLI_OS_ECOS
+noinst_PROGRAMS = cli_demo$(EXEEXT)
+@HAVE_KERNEL_CLI_TRUE@am__append_6 = \
+@HAVE_KERNEL_CLI_TRUE@				   demo/cli_kmod_demo.c 
+
+@HAVE_KERNEL_CLI_TRUE@am__append_7 = -DHAVE_KERNEL_CLI
+@HAVE_KERNEL_CLI_TRUE@am__append_8 = \
+@HAVE_KERNEL_CLI_TRUE@	src/kmod/user/cli_kmod_user.c 
+
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(srcdir)/config.h.in $(top_srcdir)/build-aux/depcomp COPYING \
-	INSTALL build-aux/ar-lib build-aux/compile \
-	build-aux/config.guess build-aux/config.sub build-aux/depcomp \
-	build-aux/install-sh build-aux/missing build-aux/ltmain.sh \
-	$(top_srcdir)/build-aux/ar-lib $(top_srcdir)/build-aux/compile \
+	$(srcdir)/config.h.in $(top_srcdir)/build-aux/depcomp \
+	$(am__include_HEADERS_DIST) COPYING INSTALL build-aux/ar-lib \
+	build-aux/compile build-aux/config.guess build-aux/config.sub \
+	build-aux/depcomp build-aux/install-sh build-aux/missing \
+	build-aux/ltmain.sh $(top_srcdir)/build-aux/ar-lib \
+	$(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/config.guess \
 	$(top_srcdir)/build-aux/config.sub \
 	$(top_srcdir)/build-aux/install-sh \
@@ -133,10 +147,18 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmini_cli_la_LIBADD =
+am__libmini_cli_la_SOURCES_DIST = src/cli_auth.c src/cli_builtin_cmd.c \
+	src/cli_cmd.c src/cli_console.c src/cli_error.c \
+	src/cli_history.c src/cli_history_item.c src/cli_main.c \
+	src/cli_node.c src/cli_parser.c src/cli_readline.c \
+	src/cli_server.c src/cli_shell.c src/cli_telnet.c \
+	src/cli_tty.c src/cli_utils.c src/cli_vector.c \
+	src/kmod/user/cli_kmod_user.c
 am__dirstamp = $(am__leading_dot)dirstamp
+@HAVE_KERNEL_CLI_TRUE@am__objects_1 = src/kmod/user/libmini_cli_la-cli_kmod_user.lo
 am_libmini_cli_la_OBJECTS = src/libmini_cli_la-cli_auth.lo \
 	src/libmini_cli_la-cli_builtin_cmd.lo \
 	src/libmini_cli_la-cli_cmd.lo \
@@ -151,8 +173,7 @@ am_libmini_cli_la_OBJECTS = src/libmini_cli_la-cli_auth.lo \
 	src/libmini_cli_la-cli_shell.lo \
 	src/libmini_cli_la-cli_telnet.lo src/libmini_cli_la-cli_tty.lo \
 	src/libmini_cli_la-cli_utils.lo \
-	src/libmini_cli_la-cli_vector.lo \
-	src/kmod/user/libmini_cli_la-cli_kmod_user.lo
+	src/libmini_cli_la-cli_vector.lo $(am__objects_1)
 libmini_cli_la_OBJECTS = $(am_libmini_cli_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -160,16 +181,19 @@ am__v_lt_0 = --silent
 am__v_lt_1 = 
 libmini_cli_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(libmini_cli_la_LDFLAGS) $(LDFLAGS) -o \
-	$@
-PROGRAMS = $(bin_PROGRAMS)
-am_mini_cli_OBJECTS = demo/mini_cli-cli_demo.$(OBJEXT) \
-	demo/mini_cli-cli_kmod_demo.$(OBJEXT)
-mini_cli_OBJECTS = $(am_mini_cli_OBJECTS)
-mini_cli_LDADD = $(LDADD)
-mini_cli_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(mini_cli_LDFLAGS) $(LDFLAGS) -o $@
+	$(libmini_cli_la_CFLAGS) $(CFLAGS) $(libmini_cli_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+PROGRAMS = $(noinst_PROGRAMS)
+am__cli_demo_SOURCES_DIST = demo/cli_demo.c demo/cli_kmod_demo.c
+@HAVE_KERNEL_CLI_TRUE@am__objects_2 =  \
+@HAVE_KERNEL_CLI_TRUE@	demo/cli_demo-cli_kmod_demo.$(OBJEXT)
+am_cli_demo_OBJECTS = demo/cli_demo-cli_demo.$(OBJEXT) \
+	$(am__objects_2)
+cli_demo_OBJECTS = $(am_cli_demo_OBJECTS)
+cli_demo_LDADD = $(LDADD)
+cli_demo_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(cli_demo_CFLAGS) \
+	$(CFLAGS) $(cli_demo_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -204,13 +228,17 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libmini_cli_la_SOURCES) $(mini_cli_SOURCES)
-DIST_SOURCES = $(libmini_cli_la_SOURCES) $(mini_cli_SOURCES)
+SOURCES = $(libmini_cli_la_SOURCES) $(cli_demo_SOURCES)
+DIST_SOURCES = $(am__libmini_cli_la_SOURCES_DIST) \
+	$(am__cli_demo_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__include_HEADERS_DIST = src/kmod/inc/cli_cmn.h src/inc/cli_error.h \
+	src/inc/cli_api.h
+HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)config.h.in
 # Read a list of newline-separated strings from the standard input,
@@ -276,7 +304,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GREP = @GREP@
-HAVE_KERNEL_CLI = @HAVE_KERNEL_CLI@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -394,36 +421,22 @@ EXTRA_DIST = demo/module/Makefile \
 		   demo/cli_demo.h \
 		   README.rst
 
+include_HEADERS = src/kmod/inc/cli_cmn.h src/inc/cli_error.h \
+	src/inc/cli_api.h $(am__append_2)
 VERSION_INFO = 1:0:0
-FLAGS = -Isrc/inc -Idemo/ -Isrc/kmod/inc 
-mini_cli_SOURCES = \
-				   demo/cli_demo.c \
-				   demo/cli_kmod_demo.c 
-
-mini_cli_CPPFLAGS = $(FLAGS)
-mini_cli_LDFLAGS = -lmini_cli 
+CLI_FLAGS = -Isrc/inc -Isrc/kmod/inc $(am__append_1) $(am__append_3) \
+	$(am__append_4) $(am__append_5) $(am__append_7)
+cli_demo_SOURCES = demo/cli_demo.c $(am__append_6)
+cli_demo_CFLAGS = $(CLI_FLAGS) -Idemo/
+cli_demo_LDFLAGS = -lmini_cli 
 lib_LTLIBRARIES = libmini_cli.la
-libmini_cli_la_SOURCES = \
-	src/cli_auth.c \
-	src/cli_builtin_cmd.c \
-	src/cli_cmd.c \
-	src/cli_console.c \
-	src/cli_error.c \
-	src/cli_history.c \
-	src/cli_history_item.c \
-	src/cli_main.c \
-	src/cli_node.c \
-	src/cli_parser.c \
-	src/cli_readline.c \
-	src/cli_server.c \
-	src/cli_shell.c \
-	src/cli_telnet.c \
-	src/cli_tty.c \
-	src/cli_utils.c \
-	src/cli_vector.c \
-	src/kmod/user/cli_kmod_user.c 
-
-libmini_cli_la_CPPFLAGS = $(FLAGS)
+libmini_cli_la_SOURCES = src/cli_auth.c src/cli_builtin_cmd.c \
+	src/cli_cmd.c src/cli_console.c src/cli_error.c \
+	src/cli_history.c src/cli_history_item.c src/cli_main.c \
+	src/cli_node.c src/cli_parser.c src/cli_readline.c \
+	src/cli_server.c src/cli_shell.c src/cli_telnet.c \
+	src/cli_tty.c src/cli_utils.c src/cli_vector.c $(am__append_8)
+libmini_cli_la_CFLAGS = $(CLI_FLAGS)
 libmini_cli_la_LDFLAGS = -version-info $(VERSION_INFO)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -566,49 +579,9 @@ src/kmod/user/libmini_cli_la-cli_kmod_user.lo:  \
 
 libmini_cli.la: $(libmini_cli_la_OBJECTS) $(libmini_cli_la_DEPENDENCIES) $(EXTRA_libmini_cli_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libmini_cli_la_LINK) -rpath $(libdir) $(libmini_cli_la_OBJECTS) $(libmini_cli_la_LIBADD) $(LIBS)
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do echo "$$p $$p"; done | \
-	sed 's/$(EXEEXT)$$//' | \
-	while read p p1; do if test -f $$p \
-	 || test -f $$p1 \
-	  ; then echo "$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n;h' \
-	    -e 's|.*|.|' \
-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
-	sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
-	    else { print "f", $$3 "/" $$4, $$1; } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	    } \
-	; done
 
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
-	      -e 's/$$/$(EXEEXT)/' \
-	`; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -621,14 +594,14 @@ demo/$(am__dirstamp):
 demo/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) demo/$(DEPDIR)
 	@: > demo/$(DEPDIR)/$(am__dirstamp)
-demo/mini_cli-cli_demo.$(OBJEXT): demo/$(am__dirstamp) \
+demo/cli_demo-cli_demo.$(OBJEXT): demo/$(am__dirstamp) \
 	demo/$(DEPDIR)/$(am__dirstamp)
-demo/mini_cli-cli_kmod_demo.$(OBJEXT): demo/$(am__dirstamp) \
+demo/cli_demo-cli_kmod_demo.$(OBJEXT): demo/$(am__dirstamp) \
 	demo/$(DEPDIR)/$(am__dirstamp)
 
-mini_cli$(EXEEXT): $(mini_cli_OBJECTS) $(mini_cli_DEPENDENCIES) $(EXTRA_mini_cli_DEPENDENCIES) 
-	@rm -f mini_cli$(EXEEXT)
-	$(AM_V_CCLD)$(mini_cli_LINK) $(mini_cli_OBJECTS) $(mini_cli_LDADD) $(LIBS)
+cli_demo$(EXEEXT): $(cli_demo_OBJECTS) $(cli_demo_DEPENDENCIES) $(EXTRA_cli_demo_DEPENDENCIES) 
+	@rm -f cli_demo$(EXEEXT)
+	$(AM_V_CCLD)$(cli_demo_LINK) $(cli_demo_OBJECTS) $(cli_demo_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -641,8 +614,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@demo/$(DEPDIR)/mini_cli-cli_demo.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@demo/$(DEPDIR)/mini_cli-cli_kmod_demo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@demo/$(DEPDIR)/cli_demo-cli_demo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@demo/$(DEPDIR)/cli_demo-cli_kmod_demo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libmini_cli_la-cli_auth.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libmini_cli_la-cli_builtin_cmd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libmini_cli_la-cli_cmd.Plo@am__quote@
@@ -687,158 +660,158 @@ distclean-compile:
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
 src/libmini_cli_la-cli_auth.lo: src/cli_auth.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_auth.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_auth.Tpo -c -o src/libmini_cli_la-cli_auth.lo `test -f 'src/cli_auth.c' || echo '$(srcdir)/'`src/cli_auth.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_auth.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_auth.Tpo -c -o src/libmini_cli_la-cli_auth.lo `test -f 'src/cli_auth.c' || echo '$(srcdir)/'`src/cli_auth.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_auth.Tpo src/$(DEPDIR)/libmini_cli_la-cli_auth.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_auth.c' object='src/libmini_cli_la-cli_auth.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_auth.lo `test -f 'src/cli_auth.c' || echo '$(srcdir)/'`src/cli_auth.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_auth.lo `test -f 'src/cli_auth.c' || echo '$(srcdir)/'`src/cli_auth.c
 
 src/libmini_cli_la-cli_builtin_cmd.lo: src/cli_builtin_cmd.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_builtin_cmd.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_builtin_cmd.Tpo -c -o src/libmini_cli_la-cli_builtin_cmd.lo `test -f 'src/cli_builtin_cmd.c' || echo '$(srcdir)/'`src/cli_builtin_cmd.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_builtin_cmd.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_builtin_cmd.Tpo -c -o src/libmini_cli_la-cli_builtin_cmd.lo `test -f 'src/cli_builtin_cmd.c' || echo '$(srcdir)/'`src/cli_builtin_cmd.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_builtin_cmd.Tpo src/$(DEPDIR)/libmini_cli_la-cli_builtin_cmd.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_builtin_cmd.c' object='src/libmini_cli_la-cli_builtin_cmd.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_builtin_cmd.lo `test -f 'src/cli_builtin_cmd.c' || echo '$(srcdir)/'`src/cli_builtin_cmd.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_builtin_cmd.lo `test -f 'src/cli_builtin_cmd.c' || echo '$(srcdir)/'`src/cli_builtin_cmd.c
 
 src/libmini_cli_la-cli_cmd.lo: src/cli_cmd.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_cmd.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_cmd.Tpo -c -o src/libmini_cli_la-cli_cmd.lo `test -f 'src/cli_cmd.c' || echo '$(srcdir)/'`src/cli_cmd.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_cmd.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_cmd.Tpo -c -o src/libmini_cli_la-cli_cmd.lo `test -f 'src/cli_cmd.c' || echo '$(srcdir)/'`src/cli_cmd.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_cmd.Tpo src/$(DEPDIR)/libmini_cli_la-cli_cmd.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_cmd.c' object='src/libmini_cli_la-cli_cmd.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_cmd.lo `test -f 'src/cli_cmd.c' || echo '$(srcdir)/'`src/cli_cmd.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_cmd.lo `test -f 'src/cli_cmd.c' || echo '$(srcdir)/'`src/cli_cmd.c
 
 src/libmini_cli_la-cli_console.lo: src/cli_console.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_console.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_console.Tpo -c -o src/libmini_cli_la-cli_console.lo `test -f 'src/cli_console.c' || echo '$(srcdir)/'`src/cli_console.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_console.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_console.Tpo -c -o src/libmini_cli_la-cli_console.lo `test -f 'src/cli_console.c' || echo '$(srcdir)/'`src/cli_console.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_console.Tpo src/$(DEPDIR)/libmini_cli_la-cli_console.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_console.c' object='src/libmini_cli_la-cli_console.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_console.lo `test -f 'src/cli_console.c' || echo '$(srcdir)/'`src/cli_console.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_console.lo `test -f 'src/cli_console.c' || echo '$(srcdir)/'`src/cli_console.c
 
 src/libmini_cli_la-cli_error.lo: src/cli_error.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_error.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_error.Tpo -c -o src/libmini_cli_la-cli_error.lo `test -f 'src/cli_error.c' || echo '$(srcdir)/'`src/cli_error.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_error.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_error.Tpo -c -o src/libmini_cli_la-cli_error.lo `test -f 'src/cli_error.c' || echo '$(srcdir)/'`src/cli_error.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_error.Tpo src/$(DEPDIR)/libmini_cli_la-cli_error.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_error.c' object='src/libmini_cli_la-cli_error.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_error.lo `test -f 'src/cli_error.c' || echo '$(srcdir)/'`src/cli_error.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_error.lo `test -f 'src/cli_error.c' || echo '$(srcdir)/'`src/cli_error.c
 
 src/libmini_cli_la-cli_history.lo: src/cli_history.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_history.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_history.Tpo -c -o src/libmini_cli_la-cli_history.lo `test -f 'src/cli_history.c' || echo '$(srcdir)/'`src/cli_history.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_history.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_history.Tpo -c -o src/libmini_cli_la-cli_history.lo `test -f 'src/cli_history.c' || echo '$(srcdir)/'`src/cli_history.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_history.Tpo src/$(DEPDIR)/libmini_cli_la-cli_history.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_history.c' object='src/libmini_cli_la-cli_history.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_history.lo `test -f 'src/cli_history.c' || echo '$(srcdir)/'`src/cli_history.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_history.lo `test -f 'src/cli_history.c' || echo '$(srcdir)/'`src/cli_history.c
 
 src/libmini_cli_la-cli_history_item.lo: src/cli_history_item.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_history_item.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_history_item.Tpo -c -o src/libmini_cli_la-cli_history_item.lo `test -f 'src/cli_history_item.c' || echo '$(srcdir)/'`src/cli_history_item.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_history_item.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_history_item.Tpo -c -o src/libmini_cli_la-cli_history_item.lo `test -f 'src/cli_history_item.c' || echo '$(srcdir)/'`src/cli_history_item.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_history_item.Tpo src/$(DEPDIR)/libmini_cli_la-cli_history_item.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_history_item.c' object='src/libmini_cli_la-cli_history_item.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_history_item.lo `test -f 'src/cli_history_item.c' || echo '$(srcdir)/'`src/cli_history_item.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_history_item.lo `test -f 'src/cli_history_item.c' || echo '$(srcdir)/'`src/cli_history_item.c
 
 src/libmini_cli_la-cli_main.lo: src/cli_main.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_main.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_main.Tpo -c -o src/libmini_cli_la-cli_main.lo `test -f 'src/cli_main.c' || echo '$(srcdir)/'`src/cli_main.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_main.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_main.Tpo -c -o src/libmini_cli_la-cli_main.lo `test -f 'src/cli_main.c' || echo '$(srcdir)/'`src/cli_main.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_main.Tpo src/$(DEPDIR)/libmini_cli_la-cli_main.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_main.c' object='src/libmini_cli_la-cli_main.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_main.lo `test -f 'src/cli_main.c' || echo '$(srcdir)/'`src/cli_main.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_main.lo `test -f 'src/cli_main.c' || echo '$(srcdir)/'`src/cli_main.c
 
 src/libmini_cli_la-cli_node.lo: src/cli_node.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_node.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_node.Tpo -c -o src/libmini_cli_la-cli_node.lo `test -f 'src/cli_node.c' || echo '$(srcdir)/'`src/cli_node.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_node.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_node.Tpo -c -o src/libmini_cli_la-cli_node.lo `test -f 'src/cli_node.c' || echo '$(srcdir)/'`src/cli_node.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_node.Tpo src/$(DEPDIR)/libmini_cli_la-cli_node.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_node.c' object='src/libmini_cli_la-cli_node.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_node.lo `test -f 'src/cli_node.c' || echo '$(srcdir)/'`src/cli_node.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_node.lo `test -f 'src/cli_node.c' || echo '$(srcdir)/'`src/cli_node.c
 
 src/libmini_cli_la-cli_parser.lo: src/cli_parser.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_parser.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_parser.Tpo -c -o src/libmini_cli_la-cli_parser.lo `test -f 'src/cli_parser.c' || echo '$(srcdir)/'`src/cli_parser.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_parser.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_parser.Tpo -c -o src/libmini_cli_la-cli_parser.lo `test -f 'src/cli_parser.c' || echo '$(srcdir)/'`src/cli_parser.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_parser.Tpo src/$(DEPDIR)/libmini_cli_la-cli_parser.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_parser.c' object='src/libmini_cli_la-cli_parser.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_parser.lo `test -f 'src/cli_parser.c' || echo '$(srcdir)/'`src/cli_parser.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_parser.lo `test -f 'src/cli_parser.c' || echo '$(srcdir)/'`src/cli_parser.c
 
 src/libmini_cli_la-cli_readline.lo: src/cli_readline.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_readline.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_readline.Tpo -c -o src/libmini_cli_la-cli_readline.lo `test -f 'src/cli_readline.c' || echo '$(srcdir)/'`src/cli_readline.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_readline.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_readline.Tpo -c -o src/libmini_cli_la-cli_readline.lo `test -f 'src/cli_readline.c' || echo '$(srcdir)/'`src/cli_readline.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_readline.Tpo src/$(DEPDIR)/libmini_cli_la-cli_readline.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_readline.c' object='src/libmini_cli_la-cli_readline.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_readline.lo `test -f 'src/cli_readline.c' || echo '$(srcdir)/'`src/cli_readline.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_readline.lo `test -f 'src/cli_readline.c' || echo '$(srcdir)/'`src/cli_readline.c
 
 src/libmini_cli_la-cli_server.lo: src/cli_server.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_server.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_server.Tpo -c -o src/libmini_cli_la-cli_server.lo `test -f 'src/cli_server.c' || echo '$(srcdir)/'`src/cli_server.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_server.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_server.Tpo -c -o src/libmini_cli_la-cli_server.lo `test -f 'src/cli_server.c' || echo '$(srcdir)/'`src/cli_server.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_server.Tpo src/$(DEPDIR)/libmini_cli_la-cli_server.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_server.c' object='src/libmini_cli_la-cli_server.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_server.lo `test -f 'src/cli_server.c' || echo '$(srcdir)/'`src/cli_server.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_server.lo `test -f 'src/cli_server.c' || echo '$(srcdir)/'`src/cli_server.c
 
 src/libmini_cli_la-cli_shell.lo: src/cli_shell.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_shell.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_shell.Tpo -c -o src/libmini_cli_la-cli_shell.lo `test -f 'src/cli_shell.c' || echo '$(srcdir)/'`src/cli_shell.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_shell.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_shell.Tpo -c -o src/libmini_cli_la-cli_shell.lo `test -f 'src/cli_shell.c' || echo '$(srcdir)/'`src/cli_shell.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_shell.Tpo src/$(DEPDIR)/libmini_cli_la-cli_shell.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_shell.c' object='src/libmini_cli_la-cli_shell.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_shell.lo `test -f 'src/cli_shell.c' || echo '$(srcdir)/'`src/cli_shell.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_shell.lo `test -f 'src/cli_shell.c' || echo '$(srcdir)/'`src/cli_shell.c
 
 src/libmini_cli_la-cli_telnet.lo: src/cli_telnet.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_telnet.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_telnet.Tpo -c -o src/libmini_cli_la-cli_telnet.lo `test -f 'src/cli_telnet.c' || echo '$(srcdir)/'`src/cli_telnet.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_telnet.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_telnet.Tpo -c -o src/libmini_cli_la-cli_telnet.lo `test -f 'src/cli_telnet.c' || echo '$(srcdir)/'`src/cli_telnet.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_telnet.Tpo src/$(DEPDIR)/libmini_cli_la-cli_telnet.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_telnet.c' object='src/libmini_cli_la-cli_telnet.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_telnet.lo `test -f 'src/cli_telnet.c' || echo '$(srcdir)/'`src/cli_telnet.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_telnet.lo `test -f 'src/cli_telnet.c' || echo '$(srcdir)/'`src/cli_telnet.c
 
 src/libmini_cli_la-cli_tty.lo: src/cli_tty.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_tty.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_tty.Tpo -c -o src/libmini_cli_la-cli_tty.lo `test -f 'src/cli_tty.c' || echo '$(srcdir)/'`src/cli_tty.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_tty.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_tty.Tpo -c -o src/libmini_cli_la-cli_tty.lo `test -f 'src/cli_tty.c' || echo '$(srcdir)/'`src/cli_tty.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_tty.Tpo src/$(DEPDIR)/libmini_cli_la-cli_tty.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_tty.c' object='src/libmini_cli_la-cli_tty.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_tty.lo `test -f 'src/cli_tty.c' || echo '$(srcdir)/'`src/cli_tty.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_tty.lo `test -f 'src/cli_tty.c' || echo '$(srcdir)/'`src/cli_tty.c
 
 src/libmini_cli_la-cli_utils.lo: src/cli_utils.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_utils.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_utils.Tpo -c -o src/libmini_cli_la-cli_utils.lo `test -f 'src/cli_utils.c' || echo '$(srcdir)/'`src/cli_utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_utils.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_utils.Tpo -c -o src/libmini_cli_la-cli_utils.lo `test -f 'src/cli_utils.c' || echo '$(srcdir)/'`src/cli_utils.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_utils.Tpo src/$(DEPDIR)/libmini_cli_la-cli_utils.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_utils.c' object='src/libmini_cli_la-cli_utils.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_utils.lo `test -f 'src/cli_utils.c' || echo '$(srcdir)/'`src/cli_utils.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_utils.lo `test -f 'src/cli_utils.c' || echo '$(srcdir)/'`src/cli_utils.c
 
 src/libmini_cli_la-cli_vector.lo: src/cli_vector.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_vector.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_vector.Tpo -c -o src/libmini_cli_la-cli_vector.lo `test -f 'src/cli_vector.c' || echo '$(srcdir)/'`src/cli_vector.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/libmini_cli_la-cli_vector.lo -MD -MP -MF src/$(DEPDIR)/libmini_cli_la-cli_vector.Tpo -c -o src/libmini_cli_la-cli_vector.lo `test -f 'src/cli_vector.c' || echo '$(srcdir)/'`src/cli_vector.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libmini_cli_la-cli_vector.Tpo src/$(DEPDIR)/libmini_cli_la-cli_vector.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli_vector.c' object='src/libmini_cli_la-cli_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_vector.lo `test -f 'src/cli_vector.c' || echo '$(srcdir)/'`src/cli_vector.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/libmini_cli_la-cli_vector.lo `test -f 'src/cli_vector.c' || echo '$(srcdir)/'`src/cli_vector.c
 
 src/kmod/user/libmini_cli_la-cli_kmod_user.lo: src/kmod/user/cli_kmod_user.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/kmod/user/libmini_cli_la-cli_kmod_user.lo -MD -MP -MF src/kmod/user/$(DEPDIR)/libmini_cli_la-cli_kmod_user.Tpo -c -o src/kmod/user/libmini_cli_la-cli_kmod_user.lo `test -f 'src/kmod/user/cli_kmod_user.c' || echo '$(srcdir)/'`src/kmod/user/cli_kmod_user.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -MT src/kmod/user/libmini_cli_la-cli_kmod_user.lo -MD -MP -MF src/kmod/user/$(DEPDIR)/libmini_cli_la-cli_kmod_user.Tpo -c -o src/kmod/user/libmini_cli_la-cli_kmod_user.lo `test -f 'src/kmod/user/cli_kmod_user.c' || echo '$(srcdir)/'`src/kmod/user/cli_kmod_user.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/kmod/user/$(DEPDIR)/libmini_cli_la-cli_kmod_user.Tpo src/kmod/user/$(DEPDIR)/libmini_cli_la-cli_kmod_user.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/kmod/user/cli_kmod_user.c' object='src/kmod/user/libmini_cli_la-cli_kmod_user.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmini_cli_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/kmod/user/libmini_cli_la-cli_kmod_user.lo `test -f 'src/kmod/user/cli_kmod_user.c' || echo '$(srcdir)/'`src/kmod/user/cli_kmod_user.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmini_cli_la_CFLAGS) $(CFLAGS) -c -o src/kmod/user/libmini_cli_la-cli_kmod_user.lo `test -f 'src/kmod/user/cli_kmod_user.c' || echo '$(srcdir)/'`src/kmod/user/cli_kmod_user.c
 
-demo/mini_cli-cli_demo.o: demo/cli_demo.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT demo/mini_cli-cli_demo.o -MD -MP -MF demo/$(DEPDIR)/mini_cli-cli_demo.Tpo -c -o demo/mini_cli-cli_demo.o `test -f 'demo/cli_demo.c' || echo '$(srcdir)/'`demo/cli_demo.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/mini_cli-cli_demo.Tpo demo/$(DEPDIR)/mini_cli-cli_demo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_demo.c' object='demo/mini_cli-cli_demo.o' libtool=no @AMDEPBACKSLASH@
+demo/cli_demo-cli_demo.o: demo/cli_demo.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -MT demo/cli_demo-cli_demo.o -MD -MP -MF demo/$(DEPDIR)/cli_demo-cli_demo.Tpo -c -o demo/cli_demo-cli_demo.o `test -f 'demo/cli_demo.c' || echo '$(srcdir)/'`demo/cli_demo.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/cli_demo-cli_demo.Tpo demo/$(DEPDIR)/cli_demo-cli_demo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_demo.c' object='demo/cli_demo-cli_demo.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o demo/mini_cli-cli_demo.o `test -f 'demo/cli_demo.c' || echo '$(srcdir)/'`demo/cli_demo.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -c -o demo/cli_demo-cli_demo.o `test -f 'demo/cli_demo.c' || echo '$(srcdir)/'`demo/cli_demo.c
 
-demo/mini_cli-cli_demo.obj: demo/cli_demo.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT demo/mini_cli-cli_demo.obj -MD -MP -MF demo/$(DEPDIR)/mini_cli-cli_demo.Tpo -c -o demo/mini_cli-cli_demo.obj `if test -f 'demo/cli_demo.c'; then $(CYGPATH_W) 'demo/cli_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_demo.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/mini_cli-cli_demo.Tpo demo/$(DEPDIR)/mini_cli-cli_demo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_demo.c' object='demo/mini_cli-cli_demo.obj' libtool=no @AMDEPBACKSLASH@
+demo/cli_demo-cli_demo.obj: demo/cli_demo.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -MT demo/cli_demo-cli_demo.obj -MD -MP -MF demo/$(DEPDIR)/cli_demo-cli_demo.Tpo -c -o demo/cli_demo-cli_demo.obj `if test -f 'demo/cli_demo.c'; then $(CYGPATH_W) 'demo/cli_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_demo.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/cli_demo-cli_demo.Tpo demo/$(DEPDIR)/cli_demo-cli_demo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_demo.c' object='demo/cli_demo-cli_demo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o demo/mini_cli-cli_demo.obj `if test -f 'demo/cli_demo.c'; then $(CYGPATH_W) 'demo/cli_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_demo.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -c -o demo/cli_demo-cli_demo.obj `if test -f 'demo/cli_demo.c'; then $(CYGPATH_W) 'demo/cli_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_demo.c'; fi`
 
-demo/mini_cli-cli_kmod_demo.o: demo/cli_kmod_demo.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT demo/mini_cli-cli_kmod_demo.o -MD -MP -MF demo/$(DEPDIR)/mini_cli-cli_kmod_demo.Tpo -c -o demo/mini_cli-cli_kmod_demo.o `test -f 'demo/cli_kmod_demo.c' || echo '$(srcdir)/'`demo/cli_kmod_demo.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/mini_cli-cli_kmod_demo.Tpo demo/$(DEPDIR)/mini_cli-cli_kmod_demo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_kmod_demo.c' object='demo/mini_cli-cli_kmod_demo.o' libtool=no @AMDEPBACKSLASH@
+demo/cli_demo-cli_kmod_demo.o: demo/cli_kmod_demo.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -MT demo/cli_demo-cli_kmod_demo.o -MD -MP -MF demo/$(DEPDIR)/cli_demo-cli_kmod_demo.Tpo -c -o demo/cli_demo-cli_kmod_demo.o `test -f 'demo/cli_kmod_demo.c' || echo '$(srcdir)/'`demo/cli_kmod_demo.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/cli_demo-cli_kmod_demo.Tpo demo/$(DEPDIR)/cli_demo-cli_kmod_demo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_kmod_demo.c' object='demo/cli_demo-cli_kmod_demo.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o demo/mini_cli-cli_kmod_demo.o `test -f 'demo/cli_kmod_demo.c' || echo '$(srcdir)/'`demo/cli_kmod_demo.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -c -o demo/cli_demo-cli_kmod_demo.o `test -f 'demo/cli_kmod_demo.c' || echo '$(srcdir)/'`demo/cli_kmod_demo.c
 
-demo/mini_cli-cli_kmod_demo.obj: demo/cli_kmod_demo.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT demo/mini_cli-cli_kmod_demo.obj -MD -MP -MF demo/$(DEPDIR)/mini_cli-cli_kmod_demo.Tpo -c -o demo/mini_cli-cli_kmod_demo.obj `if test -f 'demo/cli_kmod_demo.c'; then $(CYGPATH_W) 'demo/cli_kmod_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_kmod_demo.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/mini_cli-cli_kmod_demo.Tpo demo/$(DEPDIR)/mini_cli-cli_kmod_demo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_kmod_demo.c' object='demo/mini_cli-cli_kmod_demo.obj' libtool=no @AMDEPBACKSLASH@
+demo/cli_demo-cli_kmod_demo.obj: demo/cli_kmod_demo.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -MT demo/cli_demo-cli_kmod_demo.obj -MD -MP -MF demo/$(DEPDIR)/cli_demo-cli_kmod_demo.Tpo -c -o demo/cli_demo-cli_kmod_demo.obj `if test -f 'demo/cli_kmod_demo.c'; then $(CYGPATH_W) 'demo/cli_kmod_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_kmod_demo.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) demo/$(DEPDIR)/cli_demo-cli_kmod_demo.Tpo demo/$(DEPDIR)/cli_demo-cli_kmod_demo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='demo/cli_kmod_demo.c' object='demo/cli_demo-cli_kmod_demo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mini_cli_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o demo/mini_cli-cli_kmod_demo.obj `if test -f 'demo/cli_kmod_demo.c'; then $(CYGPATH_W) 'demo/cli_kmod_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_kmod_demo.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_demo_CFLAGS) $(CFLAGS) -c -o demo/cli_demo-cli_kmod_demo.obj `if test -f 'demo/cli_kmod_demo.c'; then $(CYGPATH_W) 'demo/cli_kmod_demo.c'; else $(CYGPATH_W) '$(srcdir)/demo/cli_kmod_demo.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -850,6 +823,27 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -1076,11 +1070,10 @@ distcleancheck: distclean
 check-am: all-am
 check: check-am
 @HAVE_KERNEL_CLI_FALSE@all-local:
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) config.h all-local
-install-binPROGRAMS: install-libLTLIBRARIES
-
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS) config.h \
+		all-local
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1122,8 +1115,8 @@ maintainer-clean-generic:
 @HAVE_KERNEL_CLI_FALSE@clean-local:
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-local mostlyclean-am
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1144,13 +1137,13 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1192,38 +1185,40 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 
 .MAKE: all install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local am--refresh check \
-	check-am clean clean-binPROGRAMS clean-cscope clean-generic \
-	clean-libLTLIBRARIES clean-libtool clean-local cscope \
+	check-am clean clean-cscope clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-local clean-noinstPROGRAMS cscope \
 	cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
 	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
 	distcheck distclean distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags distcleancheck \
 	distdir distuninstallcheck dvi dvi-am html html-am info \
-	info-am install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-libLTLIBRARIES
+	info-am install install-am install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-includeHEADERS \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-libLTLIBRARIES
+
 
 @HAVE_KERNEL_CLI_TRUE@demo/module/minicli.ko:
 @HAVE_KERNEL_CLI_TRUE@	 test -f $(builddir)/demo/module/cli_kmod_demo.c  || \
-@HAVE_KERNEL_CLI_TRUE@		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ; 
-@HAVE_KERNEL_CLI_TRUE@	 $(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI" ; 
+@HAVE_KERNEL_CLI_TRUE@		$(LN_S) $(abs_top_srcdir)/demo/cli_kmod_demo.c $(builddir)/demo/module/cli_kmod_demo.c ;
+@HAVE_KERNEL_CLI_TRUE@	 cp $(abs_top_builddir)/src/kmod/kernel/Module.symvers  $(abs_top_srcdir)/demo/module
+@HAVE_KERNEL_CLI_TRUE@	 $(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/demo/module EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
 
 @HAVE_KERNEL_CLI_TRUE@src/kmod/kernel/miniclidev.ko:
 @HAVE_KERNEL_CLI_TRUE@	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel EXTRA_CFLAGS="-I$(abs_top_srcdir)/src/kmod/inc -I$(abs_top_srcdir)/src/inc -DHAVE_KERNEL_CLI"
 
-@HAVE_KERNEL_CLI_TRUE@all-local: demo/module/minicli.ko src/kmod/kernel/miniclidev.ko
+@HAVE_KERNEL_CLI_TRUE@all-local: src/kmod/kernel/miniclidev.ko demo/module/minicli.ko
 
 @HAVE_KERNEL_CLI_TRUE@clean-local:
 @HAVE_KERNEL_CLI_TRUE@	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src/kmod/kernel clean

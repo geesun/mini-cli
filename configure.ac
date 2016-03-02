@@ -15,24 +15,21 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
 
-dnl Example of default-enabled feature
 AC_ARG_ENABLE([telnet],
     AS_HELP_STRING([--disable-telnet], [Disable telnet server]))
 
-AS_IF([test "x$enable_telnet" != "xno"], [
-  AC_DEFINE([CLI_HAS_TELNETD], [1], [Enable the telnet server ])
+AM_CONDITIONAL([CLI_HAS_TELNETD], [true])
+AS_IF([test "x$enable_telnet" = "xno"], [
+  AM_CONDITIONAL([CLI_HAS_TELNETD], [false])
 ])
 
-dnl Example of default-disabled feature
 AC_ARG_ENABLE([kernel],
               AS_HELP_STRING([--enable-kernel], [Enable kernel space cli]))
 
 AM_CONDITIONAL([HAVE_KERNEL_CLI], [false])
 AS_IF([test "x$enable_kernel" = "xyes"], [
-                AC_DEFINE([HAVE_KERNEL_CLI], [1], [Enable kernel space cli])
-                AC_SUBST([HAVE_KERNEL_CLI], [1])
-                AM_CONDITIONAL([HAVE_KERNEL_CLI], [true])
-                ])
+   AM_CONDITIONAL([HAVE_KERNEL_CLI], [true])
+])
 
 
 AC_ARG_WITH(
@@ -47,20 +44,24 @@ AC_ARG_WITH(
   [with_os="linux"]
 )
 
+AM_CONDITIONAL([CLI_OS_LINUX], [false]) 
+AM_CONDITIONAL([CLI_OS_VXWORKS], [false]) 
+AM_CONDITIONAL([CLI_OS_ECOS], [false]) 
+
 case "${with_os}" in
   linux)
-    AC_DEFINE([CLI_OS_LINUX], [1], [Build for Linux systems])
+    AM_CONDITIONAL([CLI_OS_LINUX], [true]) 
     ;;
   vxworks)
-    AC_DEFINE([CLI_OS_VXWORKS], [1], [Build for vxWorks systems])
+    AM_CONDITIONAL([CLI_OS_VXWORKS], [true]) 
     ;;
   ecos)
-    AC_DEFINE([CLI_OS_ECOS], [1], [Build for Ecos systems])
+    AM_CONDITIONAL([CLI_OS_ECOS], [true]) 
     ;;
 esac
 
 # Enable "automake" to simplify creating makefiles:
-AM_INIT_AUTOMAKE([1.11 silent-rules subdir-objects -Wall -Werror])
+AM_INIT_AUTOMAKE([1.11 silent-rules subdir-objects foreign -Wall -Werror])
 AM_SILENT_RULES([yes])
 
 # Checks for programs, e.g., AC_PROG_CC

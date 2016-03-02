@@ -17,7 +17,6 @@
 
 #ifndef __CLI_KMOD_MSG_H__
 #define __CLI_KMOD_MSG_H__
-
 #define CLI_CMD_NAME_MAX_LEN   128
 #define CLI_CMD_MAX_NUM        2000
 #define CLI_CMD_MAX_ARG_NUM    15
@@ -32,11 +31,11 @@ typedef struct{
    cli_int8      argv[CLI_CMD_MAX_ARG_NUM][CLI_CMD_MAX_ARG_LEN];
 }cli_cmd_msg_t;
 
+#define IOCTL_TYPE          100
 
-#define CLI_IOCTL_CMD        1
+#define CLI_IOCTL_CMD       _IO(IOCTL_TYPE, 1)
 
 #define CLI_IOCTL_NAME      "mini-cli-dev"
-#define CLI_IOCTL_MAGIC     'C'
 
 
 
